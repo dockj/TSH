@@ -1,0 +1,44 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+	<div id="footer">
+			<div class="content">
+				<div class="shengming">
+					<p>
+						<a href="http://news.21cnjy.com/A/130/153/V49006.shtml"
+							target="_blank">免责声明</a> <a
+							href="http://www.21cnjy.com/about/about_contact-us.php"
+							target="_blank">联系我们</a>
+					</p>
+					<p>地址：深圳市龙岗区横岗街道深峰路3号启航商务大厦5楼 邮编：518000 © 2004-2016 21世纪教育网
+						粤ICP备09188801号 粤教信息(2013)2号</p>
+				</div>
+				<div class="information">
+					<p>工作时间: AM9:00-PM6:00</p>
+					<p>
+						服务电话: 0755-25526569(总机)
+						<script
+							src="http://s25.cnzz.com/stat.php?id=1840905&web_id=1840905&show=pic1"
+							type="text/javascript" language="JavaScript"></script>
+					</p>
+				</div>
+			</div>
+			<div class="cl"></div>
+			<div class="links">
+				<div class="content">
+					<p>
+						<b>友情链接：</b>
+					<div style="float: right; width: 935px;">
+						<a href="http://zhongkao.21cnjy.com/" target="_blank">21中考资源网</a>&nbsp;<a
+							href="http://www.kt5u.com/" target="_blank">课堂无忧</a>&nbsp;<a
+							href="http://gaokao.21cnjy.com/" target="_blank">21高考资源网</a>&nbsp;<a
+							href="http://d1kt.cn/" target="_blank">第一课堂</a>&nbsp;<a
+							href="http://www.xuexiaozhaopin.com/" target="_blank">学校招聘</a>&nbsp;<a
+							href="http://www.21cnjy.com" target="_blank">21世纪教育</a>&nbsp;
+					</div>
+					</p>
+				</div>
+			</div>
+
+			<br />
+		</div>
+	</div>

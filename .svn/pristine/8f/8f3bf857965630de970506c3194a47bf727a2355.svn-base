@@ -1,0 +1,54 @@
+package com.tsh.assess.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.tsh.assess.entity.AssessDTO;
+import com.tsh.assess.entity.ScoreDTO;
+import com.tsh.common.pagination.PaginatedDTO;
+
+import net.sf.json.JSONObject;
+
+public interface AssessService
+{
+	/**
+	 * 条件查询获取自评信息
+	 */
+	List<AssessDTO> qryAssessByMap(Map<String, Object> param);
+
+	/**
+	 * 插入数据至t_tsh_assess表中
+	 */
+	void insertAssess(AssessDTO dto, String[] scores, String[] options, JSONObject user) throws Exception;
+
+	/**
+	 * 分页查询自评信息
+	 */
+	PaginatedDTO<AssessDTO> qryPageAssess(AssessDTO dto);
+
+	/**
+	 * 删除自评信息
+	 */
+	void delAssessById(String id);
+
+	/**
+	 * 查询自评分数表信息
+	 */
+	List<ScoreDTO> qryScoreByMap(Map<String, Object> param);
+
+	/**
+	 * 更新自评分数表信息
+	 */
+	void updateAssess(AssessDTO dto, String[] scores, String[] options, JSONObject user, String[] id);
+
+	/**
+	 * 插入用户自评信息
+	 */
+	void insertAssessResult(String[] assessIds, List<String> scoreIds, double count, JSONObject user);
+
+	/**
+	 * 生成自评表信息
+	 */
+	List<AssessDTO> generateAssess();
+
+}

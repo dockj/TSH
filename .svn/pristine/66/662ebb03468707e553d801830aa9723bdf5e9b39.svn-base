@@ -1,0 +1,214 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/commons/head.jsp"%>
+<script type="text/javascript" src="../CacheableResource/ckeditor/ckeditor.js"></script>
+</head>
+<body>
+	<form id="paginateForm"> 
+		<div class="layout_div" >
+			<div class="navigation_div">
+				<span class="font_heading1">甲亢管理>>甲亢自评表管理</span>
+			</div>
+			<fieldset class="fieldsetdefault">
+				<legend>查询</legend>
+				<table class="layouttable" id="input_info">
+					<tr>
+						<td class="layouttable_td_label">题目编码:</td>
+						<td class="layouttable_td_widget">
+							<input name="GQDM" id="qryGQDM" class="input_text" />
+						</td>  
+						<td class="layouttable_td_label">题目名称:</td>
+						<td class="layouttable_td_widget">   
+							<input name="GQMC" id="qryGQMC" class="input_text" />
+						</td> 
+					</tr>  
+					<tr>
+						<td class="layouttable_td_label">状态:</td>
+						<td class="layouttable_td_widget">
+							<select name="status">
+								<option value="">全部</option>
+								<option value="0">保存</option>
+								<option value="1">发布</option>
+								<option value="2">禁用</option>
+							</select>
+						</td>  
+					</tr> 
+					<tr>
+						<td align="right" colspan="4">
+							<a class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a> 
+							<a class="easyui-linkbutton" onclick="javascript:$('#paginateForm')[0].reset();" iconCls="icon-cancel" id="reset">重置</a>
+						</td>
+					</tr>
+				</table>   
+			</fieldset>
+			
+			<!-- 新增加或修改 -->
+		<div style="display: none">
+		<div id="win" iconCls="icon-save" title="新增或修改">
+			<form modelAttribute="filterMask" id="frmAdd">			 
+				<fieldset style="width:850px">
+				    <legend><b>题目信息</b></legend>
+					<table width="850px">
+						<tr>
+							<td>题目编码:</td>
+							<td><input type="text" name="assCode" id="assCode" maxlength='6'/></td>
+							<td>题目类型:</td>
+							<td>
+								<select id="type" name="type">  
+									<c:forEach items="${dicts}" var="item">
+										<option value="${item.dataKey}">${item.dataValue}</option>
+									</c:forEach>
+								</select>
+							</td>
+							<td>状态:</td>
+							<td>
+								<select id="status" name="status">  
+									<option value="0">保存</option>
+									<option value="1">发布</option>
+									<option value="2">禁用</option>
+								</select>
+							</td>
+						</tr>
+						<tr >
+							<td>标题:</td>
+				    		<td colspan="5"><input type="text" name="title" id="title" size="120" maxlength='200'/></td>
+						</tr>
+						<tr>
+							<td>备注:</td>
+							<td colspan="5"><input type="text" name="remark" id="remark" size="120" maxlength='200'/></td>
+						</tr>
+						
+					</table>
+				</fieldset> 
+				<br />
+				<fieldset style="width:850px">
+				    <legend><b>选项说明：</b></legend>
+				    <table width="850">
+				    	<tr height="30">
+							<td>选项:</td>
+							<td><input type="text" name="option" id="option" size="120" maxlength='200'/></td>
+						</tr>
+						<tr>
+							<td>分数:</td>
+							<td><input type="text" name="score" id="score" size="6" maxlength='2'/></td>
+						</tr>
+				    </table>
+				</fieldset>
+				<br/>
+				<div align="center">
+					<input type="button"  value=" 提 交 " id="btnSubmit"> 
+					<input type="reset"  value=" 重 置 " id="btnReset"> 
+				</div>
+				<input type="hidden" value="" id="productId" name="productId"/>
+				<input type="hidden" value="" id="publishStatus" name="publishStatus"/>
+			</form>
+		</div>
+	</div>
+	
+			<!-- 新增加或修改 -->
+			<div class="layout_div_top_spance" title="双击编辑">
+				<table id="tableList" width="1130"  title="双击编辑"></table>
+			</div>
+		</div> 
+	</form>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/ddic.min.js"></script>
+</body>
+</html>
+<script type="text/javascript">
+	var timeId = "" ;
+	var count = 0;
+	var main = {
+		init: function(){
+			 main.query(true);
+		}, 
+		
+	    
+	    query: function(isFirst){
+	    	if(!isFirst){
+				$('#tableList').datagrid('loadData',{total:0,rows:[]});
+			}
+	    	
+			$('#tableList').html("");
+			var wd = $("#paginateForm").width(); 
+			var data = encodeURI($("#paginateForm").serialize());
+			var send_url = "<%=request.getContextPath()%>/productInfo/queryList.do?"+data;
+			var col_size = 8;
+			var tb = null;
+			
+			$('#tableList').datagrid({
+			        title:'甲亢自评查询',
+			        width:wd,
+			        url:send_url,		   
+			        columns:[[  
+		                      {field:'title',title:'标题',align:'center',width:wd*(1/(col_size+2))},
+		                      {field:'type',title:'题目类型',align:'center',width:wd*(1/(col_size+2))},
+		                      {field:'flushDate',title:'更新时间',align:'center',width:wd*(1/(col_size+2))},
+		                      {field:'status',title:'状态',align:'center',width:wd*(1/(col_size+2))}
+			        ]],
+			        pagination:true,
+			        rownumbers:true, 
+			        singleSelect:true,
+			        toolbar:[
+						       {
+							            text:' 新 增 ',
+							            align:'right',
+							            iconCls:'icon-edit',
+							            handler:function(){
+							                main.add();
+							            }
+							     },
+						        {
+						            text:' 删 除 ',
+						            align:'right',
+						            iconCls:'icon-remove',
+						            handler:function(){
+						            	var row = $('#tableList').datagrid('getSelected');
+						            	if(row == null){ 
+						            		$.messager.alert('提示','请选择一行，然后再执行此操作！','error');
+						            	}else{
+						            		$.messager.confirm('确认', '您确定要删除吗？', function(r){
+						        				if (r){
+						        					if(row.publishStatus == 2){
+									            		$.messager.alert('错误','审批通过的产品不能删除！','error');
+						        						return ;
+						        					}
+									                main.remove(row.GQDM);
+						        				}
+						        			});
+						            	}
+						            }
+						         }
+				       ],
+					onDblClickRow:function(rowIndex,rowData){
+						alert("dockj");
+					}
+			    }); 
+	    },
+		
+		add:function()
+		{
+		    main.resetAddWin(); 
+	    	$("#productId").val(""); 
+		    main.openAddWin("");
+		},
+	    resetAddWin: function(){ 
+			$("#btnSubmit").attr("disabled",false);
+			$("#btnReset").attr("disabled",false);
+	    	$('#btnReset').click();
+	    },
+	    openAddWin: function(pred){   
+		    $('#win').window({
+	    	    width:900,
+	    	    height:550,
+	    	    modal:true,
+	    	    onOpen: function(){
+	    	    }
+	    	 }); 
+	    }
+	}
+	
+	$(function(){
+		main.init();
+	})
+</script>

@@ -1,0 +1,93 @@
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td {margin: 0; padding: 0;}
+
+body, button, input, select, textarea /* for ie */ {
+  font: 12px/1.5 tahoma, arial, Microsoft Yahei, sans-serif;
+}
+h1, h2, h3, h4, h5, h6 { font-size: 100%; font-weight:normal;}
+address, cite, dfn, em, var { font-style: normal; } /* 将斜体扶正 */
+code, kbd, pre, samp { font-family: courier new, courier, monospace; } /* 统一等宽字体 */
+
+/** 重置列表元素 **/
+ul, ol { list-style: none; }
+
+/** 重置文本格式元素 **/
+a { text-decoration: none; color:#0c6edc; }
+a:hover { text-decoration: underline; }
+
+/** 重置表单元素 **/
+legend { color: #000; } /* for ie6 */
+fieldset, img { border: 0; } /* img 搭车：让链接里的 img 无边框 */
+button, input, select, textarea { font-size: 100%; } /* 使得表单元素在 ie 下能继承字体大小 */
+
+/** 重置表格元素 **/
+table { border-collapse: collapse; border-spacing: 0; }
+
+/* 清除浮动 */
+.ks-clear:after, .clear:after {
+  content: '\20';
+  display: block;
+  height: 0;
+  clear: both;
+}
+.ks-clear, .clear {
+  *zoom: 1;
+}
+
+@font-face {font-family: "iconfont";
+  src: url('iconfont.eot'); /* IE9*/
+  src: url('iconfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('iconfont.woff') format('woff'), /* chrome、firefox */
+  url('iconfont.ttf') format('truetype'), /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+  url('iconfont.svg#iconfont') format('svg'); /* iOS 4.1- */
+}
+
+.iconfont {
+  font-family:"iconfont" !important;
+  font-size:16px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon-psw:before { content: "\f0065"; }
+.icon-user:before { content: "\f00ec"; }
+.icon-head:before { content: "\e600"; }
+.icon-code:before { content: "\e61b"; }
+
+a.fc-blue, .fc-blue{color:#004ea2 !important;}
+a.fc-org, .fc-org{color:#fcb71a !important;}
+a.fc-org, .fc-red{color:#f30 !important;font-size:15px}
+
+.bg-blue{background-color:#004ea2 !important;}
+.bg-org{background-color:#fcb71a !important;}
+
+.tal{text-align:left !important;}
+.tar{text-align:right !important;}
+.tac{text-align:center !important;}
+
+.mt-10{margin-top:10px !important;}
+.mt-20{margin-top:20px !important;}
+.mt-30{margin-top:30px !important;}
+.mt-40{margin-top:40px !important;}
+.ml-70{margin-left:40px !important;}
+
+.header{padding:10px 0; width:100%; background:#004ea2; text-align:center;}
+.page-warp{margin-left:auto; margin-right:auto;}
+.page-title{font-size:18px; color:#004ea2; text-align:center;}
+
+.form-item{border:1px solid #d5d5d5; border-radius:3px; height:55px; line-height:53px; overflow:hidden;background-color:#fff;}
+input.form-input{border:none; height:55px; background:url(../images/style/split.png) left center no-repeat; width:360px; padding-left:18px;}
+.form-erbox{height:1.5em;}
+.btn, a.btn{padding:.6em 1.2em; min-width:6em; display:inline-block; border-radius:8px; text-align:center; cursor:pointer;}
+a.btn:hover{text-decoration:none;}
+.disabled, a.disabled{background-color:#bbb !important; color:#fff !important; cursor:default;}
+
+.xls-login-bg{background:#e5e5e5;}
+.xls-login{width:660px; padding:60px 0 20px;}
+.xls-login-form{padding:0 115px; /*background-color:#fff;*/ border-radius:5px;font-size:20px;}
+.xls-login-form .iconfont{font-size:30px; padding:0 10px; color:#999; display:inline-block; vertical-align:middle;}
+.xls-login-form .icon-head{font-size:86px;}
+.xls-login-btn, a.xls-login-btn{padding:10px 0;width:40%;background-color:#0263ca; color:#fff; font-size:18px;margin-left:20px;margin-right:10px}
+.roleType{margin-right:10px;height:20px;margin-top:12px}
+
+

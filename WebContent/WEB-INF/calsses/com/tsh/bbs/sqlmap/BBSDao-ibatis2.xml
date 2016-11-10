@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+	<typeAlias alias="topicDTO" type="com.tsh.bbs.entity.TopicDTO"/>
+	<typeAlias alias="postDTO" type="com.tsh.bbs.entity.PostDTO" />
+	<typeAlias alias="replyDTO" type="com.tsh.bbs.entity.ReplyDTO" />
+	
+	<sql id="qry_topic_conditon">
+		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="topicName">
+					topicName=#topicName#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="status">
+					status=#status#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="id">
+					id=#id#
+				</isNotEmpty>
+		</dynamic>
+	</sql>
+	<!-- 条件查询患者信息 -->
+	<select id="qry.topic.list" parameterClass="map" resultClass="topicDTO">
+		SELECT
+			id,topicName,status,createDate createTime,updateDate updateTime,updateBy,createBy
+		FROM
+		   t_tsh_bbs_topic
+		     <include refid="qry_topic_conditon"/>
+		    ORDER BY updateTime  DESC
+			<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+			</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.topic.list.total" parameterClass="map" resultClass="int">
+		SELECT
+			COUNT(1)
+		FROM
+		   t_tsh_bbs_topic
+		     <include refid="qry_topic_conditon"/>
+	</select>
+	<!-- 插入话题 -->
+	<insert id="insert.topic" parameterClass="topicDTO" >
+		insert into t_tsh_bbs_topic(topicName,userId,status,createBy,updateBy,createDate,updateDate) values
+		(#topicName#,#userId#,#status#,#createBy#,#updateBy#,#createDate#,#updateDate#)
+		<selectKey keyProperty="id" resultClass="long">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 更新话题 -->
+	<update id="update.topic" parameterClass="topicDTO">
+		update t_tsh_bbs_topic set 
+		topicName=#topicName#,
+		status=#status#,
+		updateBy=#updateBy#,
+		updateDate=#updateDate#
+		where id=#id#
+		and userId=#userId#
+	</update>
+	<!-- 添加帖子 -->
+	<insert id="insert.post" parameterClass="postDTO">
+		insert into t_tsh_bbs_post (topicId,topicName,userId,username,realname,postName,postContent,status,createBy,createDate,updateBy,updateDate)
+		values(#topicId#,#topicName#,#userId#,#username#,#realname#,#postName#,#postContent#,#status#,#createBy#,#createDate#,#updateBy#,#updateDate#)
+		<selectKey keyProperty="id" resultClass="long">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 分页查询帖子 -->
+	<sql id="qry_post_conditon">
+		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="topicName">
+					ttbp.topicName like '%$topicName$%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="status">
+					ttbp.status=#status#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					ttbp.username=#username#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="postName">
+					ttbp.postName like '%$postName$%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="id">
+					ttbp.id=#id#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="topicId">
+					ttbp.topicId=#topicId#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="topicStatus">
+					ttbt.status=#topicStatus#
+				</isNotEmpty>
+		</dynamic>
+	</sql>
+	<!-- 条件查询患者信息 -->
+	<select id="qry.post.list" parameterClass="map" resultClass="postDTO">
+		SELECT
+			ttbp.id,topicId,ttbp.topicName,ttbp.postName,ttbp.postContent,ttbp.status,ttbp.userId,ttbp.realname,ttbp.username,ttbp.createDate createTime,ttbp.updateDate updateTime,ttbp.updateBy,ttbp.createBy 
+		FROM
+		   t_tsh_bbs_post ttbp
+		   left join t_tsh_bbs_topic ttbt
+		   on ttbp.topicId=ttbt.id
+		     <include refid="qry_post_conditon"/>
+		    ORDER BY updateTime DESC
+			<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+			</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.post.list.total" parameterClass="map" resultClass="int">
+		SELECT
+			COUNT(1)
+		FROM
+		   t_tsh_bbs_post ttbp
+		   left join t_tsh_bbs_topic ttbt
+		   on ttbp.topicId=ttbt.id
+		     <include refid="qry_post_conditon"/>
+	</select>
+	<!-- 更新帖子 -->
+	<update id="update.post"  parameterClass="postDTO">
+		 update t_tsh_bbs_post set postName=#postName#,postContent=#postContent#,status=#status#,updateBy=#updateBy#,updateDate=#updateDate#
+		 where id=#id#
+		 and userId=#userId#
+	</update>
+	
+	<!-- 分页查询回复 -->
+	<sql id="qry_reply_conditon">
+		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="status">
+					status=#status#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="username">
+					username=#username#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="postName">
+					postName like '%$postName$%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="id">
+					id=#id#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="postId">
+					postId=#postId#
+				</isNotEmpty>
+		</dynamic>
+	</sql>
+	<!-- 条件查询患者信息 -->
+	<select id="qry.reply.list" parameterClass="map" resultClass="replyDTO">
+		SELECT
+			id,postId,floor,postName,replyContent,userId,realname,username,status,createDate createTime,updateDate updateTime,createBy,updateBy
+		FROM
+		   t_tsh_bbs_reply
+		<include refid="qry_reply_conditon"/>   
+		    ORDER BY updateTime DESC
+			<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+			</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.reply.list.total" parameterClass="map" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+		   t_tsh_bbs_reply
+		<include refid="qry_reply_conditon"/>  
+	</select>
+	
+	<!-- 插入回复信息 -->
+	<insert id="insert.reply" parameterClass="replyDTO">
+		insert into t_tsh_bbs_reply(postId,floor,postName,userId,realname,username,status,replyContent,createBy,updateBy,createDate,updateDate)
+		values(#postId#,#floor#,#postName#,#userId#,#realname#,#username#,#status#,#replyContent#,#createBy#,#updateBy#,#createDate#,#updateDate#)
+			<selectKey keyProperty="id" resultClass="long">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	
+	<!-- 查询帖子数量 -->
+	<select id="qry.post.num" parameterClass="map" resultClass="int">
+		SELECT 
+		    COUNT(1)
+		FROM
+		    t_tsh_bbs_post ttbp
+		        LEFT JOIN
+		    t_tsh_bbs_topic ttbt ON ttbp.topicId = ttbt.id
+		<dynamic prepend="WHERE">
+		  <isNotEmpty prepend="AND" property="postStatus">
+		  		  ttbp.status = #postStatus#
+		  </isNotEmpty>
+		  <isNotEmpty prepend="AND" property="topicStatus">
+		  		  ttbt.status = #topicStatus#
+		  </isNotEmpty>
+		  <isNotEmpty prepend="AND" property="topicId">
+		  		  ttbp.topicId = #topicId#
+		  </isNotEmpty>
+		</dynamic>    
+	</select>
+	<!-- 查询回复数量 -->
+	<select id="qry.reply.num" parameterClass="map" resultClass="int" >
+		SELECT 
+		    COUNT(1)
+		FROM
+		    t_tsh_bbs_reply ttbr
+		        LEFT JOIN
+		    t_tsh_bbs_post ttbp ON ttbr.postId = ttbp.id
+		    left join t_tsh_bbs_topic ttbt 
+		    on ttbt.id=ttbp.topicId
+		<dynamic prepend="WHERE">
+		  <isNotEmpty prepend="AND" property="postStatus">
+		  		  ttbp.status = #postStatus#
+		  </isNotEmpty>
+		  <isNotEmpty prepend="AND" property="topicStatus">
+		  		  ttbt.status = #topicStatus#
+		  </isNotEmpty>
+		   <isNotEmpty prepend="AND" property="replyStatus">
+		  		  ttbr.status = #replyStatus#
+		  </isNotEmpty>
+		  <isNotEmpty prepend="AND" property="postId">
+		  		  ttbr.postId = #postId#
+		  </isNotEmpty>
+		</dynamic>  
+	</select>
+	
+	<!-- 查询最新的回复人 -->
+	<select id="qry.reply.newest" parameterClass="replyDTO" resultClass="replyDTO">
+		select postId,max(floor) floor from t_tsh_bbs_reply where postId=#postId# group by postId
+	</select>
+</sqlMap>
+

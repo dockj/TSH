@@ -1,0 +1,46 @@
+package com.tsh.assess.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tsh.common.BaseController;
+import com.tsh.dictionary.entity.DictDTO;
+import com.tsh.dictionary.service.DictService;
+
+@Controller
+@RequestMapping("/assess")
+public class AssessController extends BaseController
+{
+	@Autowired
+	DictService dictService;
+
+	/**
+	 * 进入查询主页
+	 */
+	@RequestMapping("main")
+	public String index(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		DictDTO dictDTO = new DictDTO();
+		dictDTO.setDataType("assType");
+		List<DictDTO> dictDTOs = dictService.qryDictByDataType(dictDTO);
+		model.addAttribute("dicts", dictDTOs);
+
+		return "/assess/assess_main";
+	}
+
+	/**
+	 * 进入添加页面
+	 */
+	@RequestMapping("toAdd")
+	public String toAdd(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "/assess/assess_add";
+	}
+}

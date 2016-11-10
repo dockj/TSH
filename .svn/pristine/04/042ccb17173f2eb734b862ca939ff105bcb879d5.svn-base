@@ -1,0 +1,13 @@
+
+jdbc.user=dev_tsh
+jdbc.password=dev_tsh
+jdbc.jdbcUrl=jdbc:mysql://localhost:3306/dev_tsh
+
+jdbc.driverClass=com.mysql.jdbc.Driver
+jdbc.poolmax=20
+jdbc.poolmin=1
+jdbc.poolinit=1
+jdbc.idleConnectionTestPeriod=1800
+jdbc.maxStatements=0
+jdbc.maxStatementsPerConnection=0
+

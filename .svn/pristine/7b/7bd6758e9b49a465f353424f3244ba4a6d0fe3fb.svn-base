@@ -1,0 +1,11 @@
+package com.tsh.assess.dao;
+
+import org.springframework.stereotype.Repository;
+
+import com.tsh.common.pagination.PaginatedDAO;
+
+@Repository
+public class AssessDao extends PaginatedDAO
+{
+
+}

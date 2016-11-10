@@ -1,0 +1,118 @@
+package com.tsh.assess.dao;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.tsh.assess.entity.AssessDTO;
+import com.tsh.assess.entity.ResultDTO;
+import com.tsh.assess.entity.ScoreDTO;
+import com.tsh.common.pagination.PaginatedDAO;
+import com.tsh.common.pagination.PaginatedDTO;
+
+@Repository
+public class AssessDao extends PaginatedDAO
+{
+	/**
+	 * 条件查询自评表信息
+	 */
+	public List<AssessDTO> qryAssessByMap(Map<String, Object> param)
+	{
+		return this.getSqlMapClientTemplate().queryForList("qry.assess.list", param);
+	}
+
+	/**
+	 * 插入数据至t_tsh_assess
+	 */
+	public Long insertAssess(AssessDTO dto)
+	{
+		return (Long) this.getSqlMapClientTemplate().insert("insert.assess", dto);
+	}
+
+	/**
+	 * 插入数据至t_tsh_assess_score表中
+	 */
+	public Long insertAssessScore(ScoreDTO scoreDTO)
+	{
+		return (Long) this.getSqlMapClientTemplate().insert("insert.assess.score", scoreDTO);
+	}
+
+	/**
+	 * 分页查询自评信息
+	 */
+	public PaginatedDTO<AssessDTO> qryPageAssess(AssessDTO dto)
+	{
+		PaginatedDTO<AssessDTO> paginatedDTO = new PaginatedDTO<AssessDTO>();
+		paginatedDTO.setPageNumber(dto.getPageNumber());
+		paginatedDTO.setPageSize(dto.getPageSize());
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("assCode", dto.getAssCode());
+		param.put("title", dto.getTitle());
+		param.put("status", dto.getStatus());
+		param.put("typeCode", dto.getTypeCode());
+		return this.paging("qry.assess.list", paginatedDTO, param);
+	}
+
+	/**
+	 * 通过id删除自评表信息 t_tsh_assess
+	 */
+	public void delAssessById(String id)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("id", id);
+		this.getSqlMapClientTemplate().delete("del.assess", param);
+	}
+	/**
+	 * 通过自评表id删除t_tsh_assess_score
+	 * @param id
+	 */
+	public void delAssessScore(String id)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("assessId", id);
+		this.getSqlMapClientTemplate().delete("del.assess.score", param);
+	}
+	/**
+	 * 条件查询分数表信息
+	 */
+	public List<ScoreDTO> qryScoreByMap(Map<String, Object> param)
+	{
+		return this.getSqlMapClientTemplate().queryForList("qry.score.list", param);
+	}
+	
+	/**
+	 * 更新自评表信息
+	 */
+	public void updateAssess(AssessDTO dto)
+	{
+		this.getSqlMapClientTemplate().update("update.assess",dto);
+	}
+	/**
+	 * 更新分数表信息
+	 */
+	public void updateScore(ScoreDTO score)
+	{
+		this.getSqlMapClientTemplate().update("update.score",score);
+	}
+	
+	/**
+	 * 插入数据至评测结果表中
+	 * @param resultDTO
+	 */
+	public Long insertAssessResult(ResultDTO resultDTO)
+	{
+		return (Long) this.getSqlMapClientTemplate().insert("insert.assess.result",resultDTO);
+	}
+
+	/**
+	 * 插入数据至用户评测表中
+	 * @param insertParam
+	 */
+	public Long insertAssessUser(Map<String, Object> insertParam)
+	{
+		return (Long) this.getSqlMapClientTemplate().insert("insert.assess.user",insertParam);		
+	}
+
+}

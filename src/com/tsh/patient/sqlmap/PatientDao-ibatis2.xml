@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+	<typeAlias alias="patientDTO" type="com.tsh.patient.entity.PatientDTO"/>
+	<typeAlias alias="followDTO" type="com.tsh.patient.entity.FollowDTO"/>
+	
+	<sql id="qry_patient_conditon">
+				<isNotEmpty prepend="AND" property="username">
+					tsu.username=#username#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="realname">
+					tsu.realname=#realname#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="mobilePhone">
+					tsu.mobilePhone=#mobilePhone#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="id">
+					tsu.id=#id#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="followStatus">
+					ttfu.status=#followStatus#
+				</isNotEmpty>
+	</sql>
+	
+	<sql id="qry_patient_list">
+		SELECT
+			tsu.id, 
+		    tsu.username,
+		    tsu.realname,
+		    tsu.sex,
+		    tsu.certiType,
+		    tsu.certiCode,
+		    tsu.age,
+		    tsu.mobilePhone,
+		    tsu.email,
+		    tsu.address,
+		    tsu.levHosDate,
+		    tsu.status,
+		    tsr.name,
+		    tsr.roleNo,
+		    ttfu.newestFollowDate newestfollowDate
+		FROM
+		    t_sys_user tsu
+		        LEFT JOIN
+		    t_sys_role_user tsru ON tsu.id = tsru.userId
+		        LEFT JOIN
+		    t_sys_role tsr ON tsru.roleNo = tsr.roleNo
+		        LEFT JOIN
+		    (SELECT 
+		        userId, MIN(followDate) newestFollowDate
+		    FROM
+		        t_tsh_follow_up
+		    WHERE
+		        status = 1
+		    GROUP BY userId) ttfu ON tsu.id = ttfu.userId
+		WHERE
+		    tsu.status = 1 AND tsr.roleNo != 1
+		     <include refid="qry_patient_conditon"/>
+	</sql>
+	
+	<!-- 条件查询患者信息 -->
+	<select id="qry.patient.list" parameterClass="map" resultClass="patientDTO">
+			select * from 
+			(
+				<include refid="qry_patient_list" />
+			) t
+		    ORDER BY t.newestfollowDate ASC
+			<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+			</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.patient.list.total" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) FROM 
+		(
+				<include refid="qry_patient_list" />
+		) t
+	</select>
+	<!-- 查询访问时间 -->
+	<sql id="qry_follow_list">
+		SELECT 
+			ttfu.id followId,
+		    tsu.username,
+		    tsu.realname,
+		    tsu.mobilePhone,
+		    tsu.levHosDate,
+		    tsr.name,
+		    tsr.roleNo,
+		    ttfu.followDate,
+		    ttfu.followedDate,
+		    ttfu.status followStatus,
+		    ttfu.result
+		FROM
+		    t_tsh_follow_up ttfu
+		        LEFT JOIN
+		    t_sys_user tsu ON tsu.id = ttfu.userId
+		        LEFT JOIN
+		    t_sys_role_user tsru ON tsu.id = tsru.userId
+		        LEFT JOIN
+		    t_sys_role tsr ON tsru.roleNo = tsr.roleNo
+		WHERE
+		    tsu.status = 1 AND tsr.roleNo != 1
+		    <include refid="qry_patient_conditon"/>
+	</sql>
+	<!-- 分页查询随访时间 -->
+	<select id="qry.follow.list" parameterClass="map" resultClass="patientDTO">
+		select * from 
+		(
+			<include refid="qry_follow_list"/>
+		) t
+		ORDER BY t.followDate
+		<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+		</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.follow.list.total" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) FROM 
+		(
+				<include refid="qry_follow_list"/>
+		) t
+	</select>
+	<!-- 条件查询随机访问时间 -->
+	<select id="qry.follows.by.map" parameterClass="map" resultClass="followDTO">
+		SELECT 
+		    id, userId, followDate, status, followedDate,result
+		FROM
+		    t_tsh_follow_up
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="userId">
+				userId=#userId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="status">
+				status=#status#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY followDate
+	</select>
+	
+	<!-- 插入随机访问时间 -->
+	<insert id="insert.follow" parameterClass="followDTO">
+		INSERT INTO t_tsh_follow_up (userId,followDate,followedDate,status,createBy,createDate,updateBy,updateDate)
+		VALUES (#userId#,#followDate#,#followedDate#,#status#,#createBy#,#createDate#,#updateBy#,#updateDate#)
+		<selectKey keyProperty="id" resultClass="long">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 更新随访时间 -->
+	<update id="update.follow" parameterClass="followDTO">
+		UPDATE t_tsh_follow_up SET 
+			followedDate=#followedDate#,status=#status#
+			<isNotEmpty prepend="," property="followDate">
+				followDate=#followDate#
+			</isNotEmpty>
+			,result=#result#
+			,updateBy=#updateBy#,updateDate=#updateDate#
+		WHERE
+			id=#id#
+	</update>
+</sqlMap>
+

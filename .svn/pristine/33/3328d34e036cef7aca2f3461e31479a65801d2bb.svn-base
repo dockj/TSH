@@ -1,0 +1,65 @@
+<%@page import="java.util.List"%>
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/inc/init.jsp"%>
+
+<!DOCTYPE html>
+<head>
+<title>left menu</title>
+<link href="${pageContext.request.contextPath }/resources/css/left.css" type="text/css"
+	rel="stylesheet" />
+</head>
+
+<body>
+
+	<div class="urbangreymenu">
+		<h3 class='headerbar'>
+			<div class="arowd">症状自评管理</div>
+		</h3>
+		<ul class="menuul">
+
+			<li><a href='${pageContext.request.contextPath }/assess/main'
+				target='rightFrame'>&nbsp;&nbsp;自评管理</a>
+			<li><a href='${pageContext.request.contextPath }/assess/viewAssess'
+				target='rightFrame'>&nbsp;&nbsp;预览自评表</a>
+		</ul>
+	</div>
+	
+	<div class="urbangreymenu">
+		
+		<h3 class='headerbar'>
+			<div class="arowd">个人信息</div>
+		</h3>
+		<ul class="menuul">
+
+			<li><a href='${pageContext.request.contextPath }/users/toModify'
+				target='rightFrame'>&nbsp;&nbsp;修改信息</a>
+			<li><a href='${pageContext.request.contextPath }/users/toModifyPwd'
+				target='rightFrame'>&nbsp;&nbsp;修改密码</a>
+		</ul>
+	</div>
+
+	<%@ include file="/WEB-INF/inc/footer.jsp"%>
+	<script>
+		var um = $('.urbangreymenu'), hd = $('.headerbar'), mul = $('.menuul'), lia = $('.urbangreymenu li a'), h = 200;
+		function setMenuh(bh) {
+			//console.log(bh, h);
+			var uh = bh - h;
+			$('.menuul').height(uh);
+		}
+
+		$(document).ready(function() {
+			h = (hd.outerHeight() + 2) * hd.length;
+			um.eq(0).addClass('ulopen');
+			lia.click(function() {
+				$('.urbangreymenu li a').removeClass('currentClickMenu');
+				$(this).addClass('currentClickMenu');
+			});
+
+			hd.click(function() {
+				um.removeClass('ulopen');
+				$(this).parent().addClass('ulopen');
+			});
+		});
+	</script>
+</body>
+</html>

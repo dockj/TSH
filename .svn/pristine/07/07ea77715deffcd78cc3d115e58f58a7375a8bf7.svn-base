@@ -1,0 +1,11 @@
+package com.tsh.assess.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import com.tsh.assess.service.AssessService;
+
+@Service
+public class AssessServiceImpl implements AssessService
+{
+
+}

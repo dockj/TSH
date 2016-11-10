@@ -1,0 +1,252 @@
+package com.tsh.user.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tsh.common.BaseController;
+import com.tsh.user.entity.RoleDTO;
+import com.tsh.user.entity.UserDTO;
+import com.tsh.user.service.UserService;
+
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("/users")
+public class UserController extends BaseController
+{
+	private final static Logger logger = Logger.getLogger(UserController.class);
+
+	@Autowired
+	private UserService userService;
+
+	/**
+	 * 进入登入页面
+	 */
+	@RequestMapping("toLogin")
+	public String toLogin(HttpServletRequest request, HttpServletResponse reponse, Model model)
+	{
+		Map<String, Object> param=new HashMap<String,Object>();
+		List<RoleDTO> dtos = userService.queryRoles(param);
+		if (dtos == null || dtos.size() < 1)
+		{
+			logger.info("未初始化数据库角色表信息。");
+		}
+		model.addAttribute("roles", dtos);
+		return "login";
+	}
+
+	/**
+	 * 用户登入
+	 */
+	@RequestMapping("login")
+	public void login(HttpServletRequest request, HttpServletResponse response)
+	{
+		JSONObject result = new JSONObject();
+
+		// 获取页面参数
+		String username = request.getParameter("username");
+		String passwrod = request.getParameter("password");
+		String roleNo = request.getParameter("roleNo");
+
+		// 参数校验
+		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(passwrod))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "用户名密码输入为空！");
+			this.printJSON(response, result);
+			return;
+		}
+		if (StringUtils.isEmpty(roleNo))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "请选择登入角色！");
+			this.printJSON(response, result);
+			return;
+		}
+		// 根据用户名、密码查询用户信息
+		UserDTO userDTO = userService.queryUserByNameAndPwd(username, passwrod);
+		if (userDTO == null)
+		{
+			result.put("resultCode", "-2");
+			result.put("note", "用户名密码不正确！");
+			this.printJSON(response, result);
+			return;
+		}
+
+		// 查询用户角色信息
+		List<RoleDTO> roleDTOs = userService.queryRoleByUserId(userDTO.getId());
+		if (roleDTOs == null || roleDTOs.size() < 1)
+		{
+			result.put("resultCode", "-2");
+			result.put("note", "权限不足！");
+			this.printJSON(response, result);
+			return;
+		}
+		else
+		{
+			for (RoleDTO dto : roleDTOs)
+			{
+				if (roleNo.equals(dto.getRoleNo()))
+				{
+					result.put("resultCode", "0");
+					result.put("note", "登入成功!");
+					result.put("roleNo", dto.getRoleNo());
+					// 将数据放置session中
+					JSONObject user = new JSONObject();
+					user.put("username", userDTO.getUsername());
+					user.put("userId", userDTO.getId());
+					user.put("roleNo", dto.getRoleNo());
+					user.put("roleName", dto.getName());
+					request.getSession().setAttribute("user", user);
+					this.printJSON(response, result);
+					return;
+				}
+			}
+		}
+		result.put("resultCode", "-2");
+		result.put("note", "角色不匹配！");
+		this.printJSON(response, result);
+	}
+
+	/**
+	 * 进入欢迎页面
+	 */
+	@RequestMapping("index")
+	public String toIndex(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "index";
+	}
+
+	/**
+	 * 进入修改密码页面
+	 */
+	@RequestMapping("toModifyPwd")
+	public String toModifyPwd(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "/user/manage/pwd_modify";
+	}
+
+	/**
+	 * 修改密码
+	 */
+	@RequestMapping("modifyPwd")
+	public void modifyPwd(HttpServletRequest request, HttpServletResponse response)
+	{
+		JSONObject result = new JSONObject();
+		// 获取页面参数
+		String oldPwd = request.getParameter("oldPwd");
+		String newPwd = request.getParameter("newPwd");
+		String reNewPwd = request.getParameter("reNewPwd");
+		// 参数非空校验
+		if (StringUtils.isEmpty(oldPwd) || StringUtils.isEmpty(newPwd) || StringUtils.isEmpty(reNewPwd))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "密码输入为空！");
+			this.printJSON(response, result);
+			return;
+		}
+		// 重复密码是否相等校验
+		if (!newPwd.equals(reNewPwd))
+		{
+			result.put("resultCode", "-2");
+			result.put("note", "密码不一致!");
+			this.printJSON(response, result);
+			return;
+		}
+		// 用户名密码校验
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		String username = user.optString("username");
+		UserDTO userDTO = userService.queryUserByNameAndPwd(username, oldPwd);
+		if (userDTO == null)
+		{
+			result.put("resultCode", "-3");
+			result.put("note", "用户名密码不匹配!");
+			this.printJSON(response, result);
+			return;
+		}
+		// 更新用户信息
+		userDTO.setPassword(newPwd);
+		userDTO.setUpdateBy(Long.valueOf(user.optString("userId")));
+		userDTO.setId(Long.valueOf(user.optString("userId")));
+		userService.updateUser(userDTO);
+
+		result.put("resultCode", "0");
+		result.put("note", "修改密码成功！");
+		this.printJSON(response, result);
+	}
+
+	/**
+	 * 进入修改用户信息页面
+	 */
+	@RequestMapping("toModify")
+	public String toModify(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		// 1、从session中获取用户id
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		UserDTO userDTO = userService.queryUserById(user.optString("userId"));
+		userDTO.setRoleNo(user.optString("roleNo"));
+		userDTO.setRoleName(user.optString("roleName"));
+		model.addAttribute("userDTO", userDTO);
+		return "/user/manage/register_modify";
+	}
+
+	/**
+	 * 修改用户注册信息
+	 */
+	@RequestMapping("modify")
+	public void modify(HttpServletRequest request, HttpServletResponse response, UserDTO userDTO)
+	{
+
+		JSONObject result = new JSONObject();
+		// 获取用户登入信息
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		String username = user.optString("username");
+		if (StringUtils.isEmpty(username))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "登入过期，请重新登入");
+			this.printJSON(response, result);
+			return;
+		}
+		// 1、参数校验
+		if (!userService.checkParam(userDTO, result, username))
+		{
+			logger.info("更新用户信息失败：" + result.toString());
+			this.printJSON(response, result);
+			return;
+		}
+
+		// 2、更新数据库
+		userDTO.setUpdateBy(Long.valueOf(user.optString("userId")));
+		userDTO.setId(Long.valueOf(user.optString("userId")));
+		userService.updateUser(userDTO);
+		
+		//3、更新session中内容
+		user.put("username", userDTO.getUsername());
+		request.getSession().setAttribute("user", user);
+		
+		result.put("resultCode", "0");
+		result.put("note", "修改成功！");
+		this.printJSON(response, result);
+	}
+	/**
+	 * 退出登入
+	 */
+	@RequestMapping("logout")
+	public String logout(HttpServletRequest request,HttpServletResponse response)
+	{
+		request.getSession().invalidate();
+		return "/users/toLogin";
+	}
+}

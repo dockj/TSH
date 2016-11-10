@@ -1,0 +1,96 @@
+package com.tsh.user.dao;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.tsh.common.pagination.PaginatedDAO;
+import com.tsh.user.entity.RoleDTO;
+import com.tsh.user.entity.UserDTO;
+
+@Repository
+public class UserDao extends PaginatedDAO
+{
+	/**
+	 * 查询平台中所有角色
+	 */
+	public List<RoleDTO> queryRoles(Map<String, Object> param)
+	{
+		return (List<RoleDTO>) this.getSqlMapClientTemplate().queryForList("query.role.info", param);
+	}
+
+	/**
+	 * 通过角色编号查询角色信息
+	 */
+	public RoleDTO queryRoleByNo(String roleNo)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("roleNo", roleNo);
+		return (RoleDTO) this.getSqlMapClientTemplate().queryForObject("query.role.info", param);
+	}
+
+	/**
+	 * 通过用户名查询用户信息
+	 */
+	public UserDTO queryUserByUserName(String username)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("username", username);
+		return (UserDTO) this.getSqlMapClientTemplate().queryForObject("query.user.info", param);
+	}
+
+	/**
+	 * 保存用户信息
+	 */
+	public Long saveUser(UserDTO userDTO)
+	{
+		return (long) this.getSqlMapClientTemplate().insert("insert.user", userDTO);
+	}
+
+	public UserDTO queryUserByNameAndPwd(String username, String password)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("username", username);
+		param.put("password", password);
+		return (UserDTO) this.getSqlMapClientTemplate().queryForObject("query.user.info", param);
+	}
+
+	/**
+	 * 保存用户角色信息
+	 */
+	public Long saveUserRole(RoleDTO roleDTO)
+	{
+		return (Long) this.getSqlMapClientTemplate().insert("insert.user.role", roleDTO);
+	}
+
+	/**
+	 * 通过userId查询角色信息
+	 */
+	public List<RoleDTO> queryRoleByUserId(Long userId)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("userId", userId + "");
+		return this.getSqlMapClientTemplate().queryForList("query.role.by.userId", param);
+	}
+
+	/**
+	 * 通过用户id查询用户信息
+	 */
+	public UserDTO queryUserById(String userId)
+	{
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("userId", userId);
+		return (UserDTO) this.getSqlMapClientTemplate().queryForObject("query.user.info", param);
+	}
+
+	/**
+	 * 更新用户信息
+	 */
+	public void updateUser(UserDTO userDTO)
+	{
+		this.getSqlMapClientTemplate().update("update.user", userDTO);
+	}
+
+}

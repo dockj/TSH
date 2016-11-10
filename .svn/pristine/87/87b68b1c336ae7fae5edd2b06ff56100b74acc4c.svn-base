@@ -1,0 +1,6 @@
+package com.tsh.assess.service;
+
+public interface AssessService
+{
+
+}

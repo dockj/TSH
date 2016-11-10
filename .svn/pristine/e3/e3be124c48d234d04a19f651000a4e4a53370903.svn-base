@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+	<typeAlias alias="roleDTO" type="com.tsh.user.entity.RoleDTO" />
+	<typeAlias alias="userDTO" type="com.tsh.user.entity.UserDTO" />
+
+	<!-- 条件查询角色信息 -->
+	<select id="query.role.info" parameterClass="map" resultClass="roleDTO">
+		SELECT
+		name, roleNo
+		FROM
+		t_sys_role
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="roleNo">
+				roleNo=#roleNo#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="status">
+				status=#status#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 条件查询用户信息 -->
+	<select id="query.user.info" resultClass="userDTO"
+		parameterClass="map">
+		SELECT
+		*
+		FROM
+		t_sys_user
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="username">
+				username=#username#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="password">
+				password=#password#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="userId">
+				id=#userId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!--插入用户信息 -->
+	<insert id="insert.user" parameterClass="userDTO">
+		INSERT INTO
+		t_sys_user(username,password,realname,sex,certiType,certiCode,age,mobilePhone,email,address,status,createBy,createDate,updateBy,updateDate,registerDate,levHosDate)
+		VALUES(#username#,#password#,#realname#,#sex#,#certiType#,#certiCode#,#age#,#mobilePhone#,#email#,#address#,#status#,#createBy#,#createDate#,#updateBy#,#updateDate#,#registerDate#,#levHosDate#)
+		<selectKey resultClass="long" keyProperty="id">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 插入用户角色关联信息 -->
+	<insert id="insert.user.role" parameterClass="roleDTO">
+		INSERT INTO
+		t_sys_role_user(description,roleNo,userId,createDate,updateDate)
+		VALUES(#description#,#roleNo#,#userId#,#createDate#,#updateDate#)
+		<selectKey resultClass="long" keyProperty="id">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 通过用户id查询角色信息 -->
+	<select id="query.role.by.userId" parameterClass="map"
+		resultClass="roleDTO">
+		SELECT
+		tsr.roleNo, tsr.name, tsru.userId
+		FROM
+		t_sys_role_user tsru
+		LEFT JOIN
+		t_sys_role tsr ON tsr.roleNo = tsru.roleNo
+		AND tsru.userId = #userId#
+	</select>
+	<!-- 跟新用户信息 -->
+	<update id="update.user" parameterClass="userDTO">
+		UPDATE t_sys_user SET
+				username=#username#
+			<isNotEmpty  property="password" prepend=",">
+				password=#password#
+			</isNotEmpty> 
+			,realname=#realname#,sex=#sex#
+			<isNotEmpty property="certiType" prepend=",">
+				certiType=#certiType#
+			</isNotEmpty>
+			,certiCode=#certiCode#,age=#age#,mobilePhone=#mobilePhone#,email=#email#,address=#address#
+			<isNotEmpty property="status" prepend=",">
+				status=#status#
+			</isNotEmpty>
+			<isNotEmpty property="createBy" prepend=",">
+				createBy=#createBy#
+			</isNotEmpty>
+			<isNotEmpty property="createDate" prepend=",">
+				createDate=#createDate#
+			</isNotEmpty>
+			,updateBy=#updateBy#,updateDate=#updateDate#
+			<isNotEmpty property="registerDate" prepend=",">
+				registerDate=#registerDate#
+			</isNotEmpty>
+			,levHosDate=#levHosDate# 
+		WHERE id=#id# 
+	</update>
+</sqlMap>
+

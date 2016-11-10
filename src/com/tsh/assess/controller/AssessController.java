@@ -1,0 +1,434 @@
+package com.tsh.assess.controller;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tsh.assess.entity.AssessDTO;
+import com.tsh.assess.entity.ResultDTO;
+import com.tsh.assess.entity.ScoreDTO;
+import com.tsh.assess.entity.TypeDTO;
+import com.tsh.assess.service.AssessService;
+import com.tsh.common.BaseController;
+import com.tsh.common.pagination.PaginatedDTO;
+import com.tsh.dictionary.entity.DictDTO;
+import com.tsh.dictionary.service.DictService;
+import com.tsh.user.entity.UserDTO;
+import com.tsh.user.service.UserService;
+
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("/assess")
+public class AssessController extends BaseController
+{
+	private final static Logger logger = Logger.getLogger(AssessController.class);
+	@Autowired
+	DictService dictService;
+
+	@Autowired
+	private AssessService assessService;
+
+	@Autowired
+	private UserService userService;
+
+	/**
+	 * 进入查询主页
+	 */
+	@RequestMapping("main")
+	public String index(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		DictDTO dictDTO = new DictDTO();
+		dictDTO.setDataType("assType");
+		List<DictDTO> dictDTOs = dictService.qryDictByDataType(dictDTO);
+		model.addAttribute("dicts", dictDTOs);
+
+		return "/assess/manage/assess_main";
+	}
+
+	/**
+	 * 添加自评信息
+	 */
+	@RequestMapping("addAssess")
+	public void addAssess(HttpServletRequest request, HttpServletResponse response, AssessDTO dto)
+	{
+		JSONObject result = new JSONObject();
+
+		// 1、获取页面参数
+		String[] scores = request.getParameterValues("score");
+		String[] options = request.getParameterValues("option");
+
+		// 2、参数校验
+		if (!checkParam(dto, result, scores, options))
+		{
+			this.printJSON(response, result);
+			return;
+		}
+		// 获取登入用户信息
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		// 3、封装参数，插入数据库
+		try
+		{
+			assessService.insertAssess(dto, scores, options, user);
+		}
+		catch (Exception e)
+		{
+
+			result.put("resultCode", "-3");
+			result.put("note", "系统异常！");
+			logger.error("保存自评表信息失败！", e);
+		}
+		result.put("resultCode", "0");
+		result.put("note", "添加自评表信息成功！");
+		this.printJSON(response, result);
+
+	}
+
+	/**
+	 * 修改自评表信息
+	 */
+	@RequestMapping("editAssess")
+	public void editAssess(HttpServletRequest request, HttpServletResponse response, AssessDTO dto)
+	{
+		JSONObject result = new JSONObject();
+
+		// 1、获取页面参数
+		String[] scores = request.getParameterValues("score");
+		String[] options = request.getParameterValues("option");
+		String[] id = request.getParameterValues("ids");
+
+		// 2、参数校验
+		if (!checkParam(dto, result, scores, options))
+		{
+			this.printJSON(response, result);
+			return;
+		}
+		// 获取登入用户信息
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		// 3、封装参数，插入数据库
+		try
+		{
+			assessService.updateAssess(dto, scores, options, user, id);
+		}
+		catch (Exception e)
+		{
+
+			result.put("resultCode", "-3");
+			result.put("note", "系统异常！");
+			logger.error("保存自评表信息失败！", e);
+		}
+		result.put("resultCode", "0");
+		result.put("note", "添加自评表信息成功！");
+		this.printJSON(response, result);
+	}
+
+	/**
+	 * 删除自评信息
+	 */
+	@RequestMapping("delAssess")
+	public void delAssess(HttpServletRequest request, HttpServletResponse response)
+	{
+		String id = request.getParameter("id");
+		assessService.delAssessById(id);
+		JSONObject result = new JSONObject();
+		result.put("resultCode", "0");
+		result.put("note", "删除成功！");
+		this.printJSON(response, result);
+
+	}
+
+	/**
+	 * 查询自评信息
+	 */
+	@RequestMapping("qryAssessList")
+	public void qryAssessList(HttpServletRequest request, HttpServletResponse response, AssessDTO dto)
+	{
+		// 获取分页参数
+		int pageNumber = request.getParameter("page") == null ? 1 : Integer.valueOf(request.getParameter("page"));
+		int pageSize = request.getParameter("rows") == null ? 10 : Integer.valueOf(request.getParameter("rows"));
+		dto.setPageNumber(pageNumber);
+		dto.setPageSize(pageSize);
+		try
+		{
+			if (dto.getTitle() != null)
+			{
+				String title = URLDecoder.decode(dto.getTitle(), "UTF-8");// 把传来的URL转换成中文
+				dto.setTitle(title);
+			}
+			PaginatedDTO<AssessDTO> pageList = assessService.qryPageAssess(dto);
+
+			if (pageList == null || pageList.getDataList() == null || pageList.getDataList().size() < 1)
+			{
+				pageList.setDataList(new ArrayList<AssessDTO>());
+			}
+
+			JSONObject result = new JSONObject();
+			result.put("total", pageList.getTotal());
+			result.put("rows", pageList.getDataList());
+			this.printJSON(response, result);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 查询自评信息
+	 */
+	@RequestMapping("qryAssess")
+	public void qryAssess(HttpServletRequest request, HttpServletResponse response)
+	{
+		String id = request.getParameter("id");
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("id", id);
+		AssessDTO dto = assessService.qryAssessByMap(param).get(0);
+		Map<String, Object> scoreParam = new HashMap<String, Object>();
+		scoreParam.put("assessId", id);
+		List<ScoreDTO> scoreDTOs = assessService.qryScoreByMap(scoreParam);
+		JSONObject result = new JSONObject();
+		result.put("resultCode", "0");
+		result.put("assess", dto);
+		result.put("scores", scoreDTOs);
+		this.printJSON(response, result);
+	}
+
+	private boolean checkParam(AssessDTO dto, JSONObject result, String[] scores, String[] options)
+	{
+		// 题目编码
+		if (StringUtils.isEmpty(dto.getAssCode()))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "题目编码不能为空!");
+			return false;
+		}
+		if (!dto.getAssCode().matches("[0-9a-zA-Z]{6}"))
+		{
+			result.put("resultCode", "-2");
+			result.put("note", "题目编码格式不正确，六位数字字母组成!");
+			return false;
+		}
+		// 更新操作
+		if (dto.getId() != null)
+		{
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("id", dto.getId());
+			AssessDTO oldDto = assessService.qryAssessByMap(param).get(0);
+			if (!dto.getAssCode().equals(oldDto.getAssCode()))
+			{
+				Map<String, Object> param2 = new HashMap<String, Object>();
+				param2.put("assCode", dto.getAssCode());
+				if (assessService.qryAssessByMap(param2) != null)
+				{
+					result.put("resultCode", "-3");
+					result.put("note", "题目编码已存在，请重新设置！");
+					return false;
+				}
+			}
+		}
+		else
+		{
+
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("assCode", dto.getAssCode());
+			if (assessService.qryAssessByMap(param) != null)
+			{
+				result.put("resultCode", "-3");
+				result.put("note", "题目编码已存在，请重新设置！");
+				return false;
+			}
+		}
+		// 类型编码
+		if (StringUtils.isEmpty(dto.getTypeCode()))
+		{
+			result.put("resultCode", "-4");
+			result.put("note", "类型编码不能为空！");
+			return false;
+		}
+		DictDTO dictDTO = new DictDTO();
+		dictDTO.setDataType("assType");
+		dictDTO.setDataKey(dto.getTypeCode());
+		List<DictDTO> dictDTOs = dictService.qryDictByDataType(dictDTO);
+		if (dictDTOs == null || dictDTOs.size() < 1)
+		{
+			result.put("resultCode", "-4");
+			result.put("note", "类型编码不存在！");
+			return false;
+		}
+		dto.setType(dictDTOs.get(0).getDataValue());
+		// 状态
+		if (StringUtils.isEmpty(dto.getStatus()))
+		{
+			result.put("resultCode", "-5");
+			result.put("note", "状态不能为空！");
+			return false;
+		}
+		// 标题
+		if (StringUtils.isEmpty(dto.getTitle()))
+		{
+			result.put("resultCode", "-6");
+			result.put("note", "标题不能为空！");
+			return false;
+		}
+		// 选项
+		if (options == null)
+		{
+			result.put("resultCode", "-7");
+			result.put("note", "选项不能为空！");
+			return false;
+		}
+		// 分数
+		if (scores == null)
+		{
+			result.put("resultCode", "-8");
+			result.put("note", "选项分数不能为空！");
+			return false;
+		}
+		for (String score : scores)
+		{
+			if (!score.matches("[1-9][0-9]*"))
+			{
+				result.put("resultCode", "-8");
+				result.put("note", "分数需有正整数构成！");
+				return false;
+			}
+		}
+		if (options.length != scores.length)
+		{
+			result.put("resultCode", "-9");
+			result.put("note", "选项、分数个数不匹配！");
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 预览自评表
+	 */
+	@RequestMapping("viewAssess")
+	public String generateAssess(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+
+		List<AssessDTO> assessDTOs = assessService.generateAssess();
+		model.addAttribute("rows", assessDTOs);
+		return "assess/manage/assess_view";
+	}
+
+	/**
+	 * 进入患者自评结果页面
+	 */
+	@RequestMapping("toAssessResult")
+	public String toAssessResult(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "assess/manage/assess_result";
+	}
+
+	/**
+	 * 分页查询患者自评结果
+	 */
+	@RequestMapping("qryAssessResultList")
+	public void assessResult(HttpServletRequest request, HttpServletResponse response, ResultDTO dto)
+	{
+		// 获取分页参数
+		int pageNumber = request.getParameter("page") == null ? 1 : Integer.valueOf(request.getParameter("page"));
+		int pageSize = request.getParameter("rows") == null ? 10 : Integer.valueOf(request.getParameter("rows"));
+		dto.setPageNumber(pageNumber);
+		dto.setPageSize(pageSize);
+		try
+		{
+			if (dto.getUsername() != null)
+			{
+				String username = URLDecoder.decode(dto.getUsername(), "UTF-8");// 把传来的URL转换成中文
+				dto.setUsername(username);
+			}
+			PaginatedDTO<ResultDTO> pageList = assessService.qryPageAssessResult(dto);
+
+			if (pageList == null || pageList.getDataList() == null || pageList.getDataList().size() < 1)
+			{
+				pageList.setDataList(new ArrayList<ResultDTO>());
+			}
+			JSONObject result = new JSONObject();
+			result.put("total", pageList.getTotal());
+			result.put("rows", pageList.getDataList());
+			this.printJSON(response, result);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 进入添加评论页面
+	 */
+	@RequestMapping("toAddComment")
+	public String addComment(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		String operation=request.getParameter("operation");
+		String evaId = request.getParameter("evaId");
+		String userId = request.getParameter("userId");
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("evaId", evaId);
+		param.put("userId", userId);
+		List<TypeDTO> typeDTOs = assessService.qryAssessTypeResult(param);
+		UserDTO userDTO = userService.queryUserById(userId);
+		param.clear();
+		param.put("id", evaId);
+		ResultDTO resultDTO = assessService.qryResultDTO(param).get(0);
+		model.addAttribute("types", typeDTOs);
+		model.addAttribute("result", resultDTO);
+		model.addAttribute("patient", userDTO);
+		model.addAttribute("operation", operation);
+		return "assess/manage/assess_add_comment";
+	}
+
+	/**
+	 * 添加评测结果
+	 */
+	@RequestMapping("addComment")
+	public void addComment(HttpServletRequest request, HttpServletResponse response, ResultDTO dto)
+	{
+		
+		JSONObject result = new JSONObject();
+		if (StringUtils.isEmpty(dto.getResult()))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "评论结果为空！");
+			this.printJSON(response, result);
+			return;
+		}
+
+		JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+		try
+		{
+			assessService.addComment(dto, user);
+			result.put("resultCode", "0");
+			result.put("note", "添加评论成功！");
+			this.printJSON(response, result);
+			return;
+		}
+		catch (Exception e)
+		{
+			logger.error("添加评论失败",e);
+			result.put("resultCode", "-2");
+			result.put("note", "系统异常！");
+			this.printJSON(response, result);
+			return;
+		}
+
+	}
+
+}

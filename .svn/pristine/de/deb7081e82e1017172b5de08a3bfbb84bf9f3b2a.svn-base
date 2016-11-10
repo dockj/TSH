@@ -1,0 +1,76 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/commons/head.jsp"%>
+<%@ include file="/WEB-INF/views/commons/pts/ptsHead.jsp"%>
+</head>
+<body>
+	<%@ include file="/WEB-INF/views/commons/pts/toorbar.jsp"%>
+	<div class="content mb10">
+		<div class="pad10 boxb" id="all_980_90_a"></div>
+	</div>
+	<div class="content">
+		<div id="mainbar">
+			<div class="test">
+				<h1>
+					<b>交流主题</b>
+				</h1>
+				
+				<div class="test_container">
+				<form id="assessForm" method="post">
+					<c:forEach items="${topics }" var="topic" varStatus="count">
+					<div class="assess_content">
+						<h4>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${count.count}、<span style="margin-left:20px;">主题：${topic.topicName}</span><span style="margin-left:20px">帖子总数：${topic.postNum }</span><span style="margin-left:20px">创建时间：${topic.createTime }</span>
+						<a href="${pageContext.request.contextPath }/ptsBBS/toAddPost?topicId=${topic.id}" style="margin-left:300px;float: right;text-decoration: none"><span style="margin-right:20px;color:green;">创建帖子</span></a>
+						</h4>
+							<c:forEach items="${topic.posts }" var="post"
+								varStatus="postCount">
+								<a href="${pageContext.request.contextPath }/ptsBBS/toViewReply?postId=${post.id}" style="text-decoration: none">
+								<p>
+									<span style="color: #0a8cd2;" >${postCount.count}、：</span><span style="margin-left:10px;color: coral;">帖子名称：${post.postName }</span><span style="margin-left:10px;color: coral;">回复数量：${post.replyNum }</span><span style="margin-left:10px;color: coral;">作者：${post.username }</span>
+									<br />
+									<span style="color:black;margin-right:40px;margin-left:20px;">${post.postContent }.....</span>
+								</p>
+								</a>
+							</c:forEach>
+					</div>
+					</c:forEach>
+				</form>
+				</div>
+			</div>
+		</div>
+
+	<script src="http://cbjs.baidu.com/js/m.js" type="text/javascript"
+		type="text/javascript" type="text/javascript"></script>
+	<script type="text/javascript">
+		BAIDU_CLB_fillSlotAsync('954654', 'all_980_90_a');
+	</script>
+
+	<!--底部加载内容-->
+	<script>
+		$("#assessForm").submit(function(){
+			$.ajax({
+	    		url:"${pageContext.request.contextPath}/assess/submitAssess",
+	    		type:"POST", 
+	    		data:$("#assessForm").serialize(),
+	    		dataType:"json",
+	    		success:function(data){ 
+		    		if(data.resultCode=="0"){
+		    	    	$('#win').window('close');
+		    		}else{ 
+		        		$.messager.alert('提示',data.note,'error');
+		    		}
+	    		}
+	    	});
+			return false;
+		});
+		$(function(){
+			$(".assess_content:even").css("background-color","#fbfbfb");
+			$(".assess_content:odd").css("background-color","#fbfaee");
+		});
+	</script>
+
+</body>
+</html>

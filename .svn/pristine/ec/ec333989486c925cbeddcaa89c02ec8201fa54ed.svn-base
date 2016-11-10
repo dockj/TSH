@@ -1,0 +1,18 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>广金所BMS后台管理系统</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<% String cxt = request.getContextPath(); %>
+<style type="text/css">
+html{height:100%; width:100%; padding:0; margin:0;}
+body{height:100%; width:100%; padding:0; margin:0; overflow:hidden; font:12px/1.5 Microsoft Yahei; background:#afc2ff url(<%=cxt%>/images/welcome.png) center center no-repeat;}
+</style>
+</head>
+<body>
+</body>
+</html>

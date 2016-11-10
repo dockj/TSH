@@ -1,0 +1,337 @@
+package com.tsh.bbs.controller;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.axis.utils.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tsh.bbs.entity.PostDTO;
+import com.tsh.bbs.entity.ReplyDTO;
+import com.tsh.bbs.entity.TopicDTO;
+import com.tsh.bbs.service.BBSService;
+import com.tsh.common.BaseController;
+import com.tsh.common.pagination.PaginatedDTO;
+
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("bbs")
+public class BBSController extends BaseController
+{
+
+	private final static Logger logger = Logger.getLogger(BBSController.class);
+
+	@Autowired
+	private BBSService bbsService;
+
+	@RequestMapping("toTopicMain")
+	public String toTopicMain(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "bbs/manage/topic_main";
+	}
+
+	/**
+	 * 分页查询话题列表
+	 */
+	@RequestMapping("qryTopicList")
+	public void qryTopicList(HttpServletRequest request, HttpServletResponse response, TopicDTO dto)
+	{
+		// 分页查询患者信息
+		// 获取分页参数
+		int pageNumber = request.getParameter("page") == null ? 1 : Integer.valueOf(request.getParameter("page"));
+		int pageSize = request.getParameter("rows") == null ? 10 : Integer.valueOf(request.getParameter("rows"));
+		dto.setPageNumber(pageNumber);
+		dto.setPageSize(pageSize);
+		try
+		{
+			if (dto.getTopicName() != null)
+			{
+				String topicName = URLDecoder.decode(dto.getTopicName(), "UTF-8");// 把传来的URL转换成中文
+				dto.setTopicName(topicName);
+			}
+			PaginatedDTO<TopicDTO> pageList = bbsService.qryPageTopic(dto);
+			JSONObject result = new JSONObject();
+			result.put("total", pageList.getTotal());
+			result.put("rows", pageList.getDataList());
+			this.printJSON(response, result);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 添加话题
+	 */
+	@RequestMapping("addTopic")
+	public void addTopic(HttpServletRequest request, HttpServletResponse response, TopicDTO dto)
+	{
+		JSONObject result = new JSONObject();
+		try
+		{
+
+			if (StringUtils.isEmpty(dto.getTopicName()))
+			{
+				result.put("resultCode", "-1");
+				result.put("note", "话题名称不能为空!");
+				this.printJSON(response, result);
+				return;
+			}
+
+			// 封装参数
+			JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+			Long userId = Long.valueOf(user.optString("userId"));
+			Date now = new Date();
+
+			dto.setCreateBy(userId);
+			dto.setUpdateBy(userId);
+			dto.setCreateDate(now);
+			dto.setUpdateDate(now);
+			dto.setPostNum(0);
+			bbsService.addTopic(dto);
+
+			result.put("resultCode", "0");
+			result.put("note", "添加话题成功！");
+			this.printJSON(response, result);
+			return;
+		}
+		catch (Exception e)
+		{
+
+			result.put("resultCode", "-200");
+			result.put("note", "系统异常！");
+			this.printJSON(response, result);
+			logger.error("插入话题失败！", e);
+			return;
+		}
+
+	}
+
+	/**
+	 * 条件查询话题
+	 */
+	@RequestMapping("qryTopic")
+	public void qryTopic(HttpServletRequest request, HttpServletResponse response)
+	{
+		JSONObject result = new JSONObject();
+		String id = request.getParameter("id");
+		if (StringUtils.isEmpty(id))
+		{
+			result.put("resultCode", "-1");
+			result.put("note", "id为空！");
+			this.printJSON(response, result);
+			return;
+		}
+
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("id", id);
+		TopicDTO dto = bbsService.qryTopicByMap(param).get(0);
+		result.put("resultCode", "0");
+		result.put("note", "查询成功");
+		result.put("topic", dto);
+		this.printJSON(response, result);
+		return;
+	}
+
+	/**
+	 * 修改话题
+	 */
+	@RequestMapping("editTopic")
+	public void editTopic(HttpServletRequest request, HttpServletResponse response, TopicDTO dto)
+	{
+		JSONObject result = new JSONObject();
+		try
+		{
+
+			if (StringUtils.isEmpty(dto.getTopicName()))
+			{
+				result.put("resultCode", "-1");
+				result.put("note", "话题名称不能为空!");
+				this.printJSON(response, result);
+				return;
+			}
+
+			// 封装参数
+			JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+			Long userId = Long.valueOf(user.optString("userId"));
+			Date now = new Date();
+
+			dto.setUpdateBy(userId);
+			dto.setUpdateDate(now);
+			bbsService.updateTopic(dto);
+
+			result.put("resultCode", "0");
+			result.put("note", "添加话题成功！");
+			this.printJSON(response, result);
+			return;
+		}
+		catch (Exception e)
+		{
+
+			result.put("resultCode", "-200");
+			result.put("note", "系统异常！");
+			this.printJSON(response, result);
+			logger.error("插入话题失败！", e);
+			return;
+		}
+
+	}
+
+	/**
+	 * 进入添加帖子页面
+	 */
+	@RequestMapping("toAddPost")
+	public String toAddPost(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		String topicId = request.getParameter("topicId");
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("id", topicId);
+		TopicDTO dto = bbsService.qryTopicByMap(param).get(0);
+		model.addAttribute("topic", dto);
+		return "bbs/manage/post_add";
+	}
+
+	/**
+	 * 添加帖子
+	 */
+	@RequestMapping("addPost")
+	public void addPost(HttpServletRequest request, HttpServletResponse response, PostDTO dto)
+	{
+		JSONObject result = new JSONObject();
+		try
+		{
+
+			JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+			if (bbsService.addPost(dto, user, result) != null)
+			{
+				result.put("resultCode", "0");
+				result.put("note", "添加帖子成功！");
+				this.printJSON(response, result);
+				return;
+			}
+			else
+			{
+				this.printJSON(response, result);
+				return;
+			}
+		}
+		catch (Exception e)
+		{
+			result.put("resultCode", "-200");
+			result.put("note", "系统异常！");
+			this.printJSON(response, result);
+			logger.error("插入帖子失败！", e);
+			return;
+		}
+	}
+
+	/**
+	 * 进入帖子管理主页
+	 */
+	@RequestMapping("toPostMain")
+	public String toPostMain(HttpServletRequest request, HttpServletResponse response)
+	{
+		return "bbs/manage/post_main";
+	}
+
+	/**
+	 * 分页查询帖子
+	 */
+	@RequestMapping("qryPostList")
+	public void qryPostList(HttpServletRequest request, HttpServletResponse response, PostDTO dto)
+	{
+		// 分页查询患者信息
+		// 获取分页参数
+		int pageNumber = request.getParameter("page") == null ? 1 : Integer.valueOf(request.getParameter("page"));
+		int pageSize = request.getParameter("rows") == null ? 10 : Integer.valueOf(request.getParameter("rows"));
+		dto.setPageNumber(pageNumber);
+		dto.setPageSize(pageSize);
+		try
+		{
+			if (dto.getTopicName() != null)
+			{
+				String topicName = URLDecoder.decode(dto.getTopicName(), "UTF-8");// 把传来的URL转换成中文
+				dto.setTopicName(topicName);
+			}
+			if (dto.getPostName() != null)
+			{
+				String postName = URLDecoder.decode(dto.getPostName(), "UTF-8");// 把传来的URL转换成中文
+				dto.setPostName(postName);
+			}
+			PaginatedDTO<PostDTO> pageList = bbsService.qryPagePost(dto);
+			JSONObject result = new JSONObject();
+			result.put("total", pageList.getTotal());
+			result.put("rows", pageList.getDataList());
+			this.printJSON(response, result);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 进入修改帖子页面
+	 */
+	@RequestMapping("toEditPost")
+	public String toEditPost(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		String postId = request.getParameter("postId");
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("id", postId);
+		PostDTO dto = bbsService.qryPostByMap(param).get(0);
+		param.put("id", dto.getTopicId());
+		TopicDTO topicDTO = bbsService.qryTopicByMap(param).get(0);
+		model.addAttribute("post", dto);
+		model.addAttribute("topic", topicDTO);
+		return "bbs/manage/post_edit";
+	}
+
+	/**
+	 * 修改帖子
+	 */
+	@RequestMapping("editPost")
+	public void editPost(HttpServletRequest request, HttpServletResponse response, PostDTO dto)
+	{
+		JSONObject result = new JSONObject();
+		try
+		{
+
+			JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+			if (bbsService.updatePost(dto, user, result))
+			{
+				result.put("resultCode", "0");
+				result.put("note", "修改成功！");
+				this.printJSON(response, result);
+				return;
+			}
+			else
+			{
+				this.printJSON(response, result);
+				return;
+			}
+		}
+		catch (Exception e)
+		{
+			result.put("resultCode", "-200");
+			result.put("note", "无权限修改！");
+			this.printJSON(response, result);
+			logger.error("插入帖子失败！", e);
+			return;
+		}
+	}
+
+}

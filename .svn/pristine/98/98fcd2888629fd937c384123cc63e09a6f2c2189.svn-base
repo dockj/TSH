@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+	<typeAlias alias="assessDTO" type="com.tsh.assess.entity.AssessDTO" />
+	<typeAlias alias="scoreDTO" type="com.tsh.assess.entity.ScoreDTO" />
+	
+	<sql id="qry_assess_condition">
+		<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="assCode">
+					assCode=#assCode#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="title">
+					title LIKE '%$title$%'
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="status">
+					status=#status#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="typeCode">
+					typeCode=#typeCode#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="id">
+					id=#id#
+				</isNotEmpty>
+			</dynamic>
+	</sql>
+	
+	<!-- 条件查询自评表信息 -->
+	<select id="qry.assess.list" parameterClass="map" resultClass="assessDTO">
+		SELECT * FROM t_tsh_assess
+			<include refid="qry_assess_condition"/>
+			ORDER BY updateDate DESC
+			<isNotEmpty property="paginationFlag">
+				LIMIT #skipIndex#,#skipRows#;
+			</isNotEmpty>
+	</select>
+	<!-- 查询总记录数 -->
+	<select id="qry.assess.list.total" parameterClass="map" resultClass="int">
+		SELECT COUNT(1) FROM t_tsh_assess 
+		<include refid="qry_assess_condition" />
+	</select>
+	
+	<!-- 插入数据至t_tsh_assess表中 -->
+	<insert id="insert.assess" parameterClass="assessDTO">
+		INSERT INTO t_tsh_assess(assCode,title,remark,type,typeCode,flushDate,status,createDate,updateDate,createBy,updateBy)
+		VALUES(#assCode#,#title#,#remark#,#type#,#typeCode#,#flushDate#,#status#,#createDate#,#updateDate#,#createBy#,#updateBy#)
+		<selectKey resultClass="long" keyProperty="id">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 插入数据至t_tsh_assess_socre -->
+	<insert id="insert.assess.score" parameterClass="scoreDTO">
+		INSERT INTO t_tsh_assess_score(assessId,`option`,score,createDate,updateDate,createBy,updateBy)
+		VALUES(#assessId#,#option#,#score#,#createDate#,#updateDate#,#createBy#,#updateBy#)
+		<selectKey resultClass="long" keyProperty="id">
+			SELECT
+			LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+	<!-- 删除t_tsh_assess信息 -->
+	<delete id="del.assess" parameterClass="map">
+		DELETE FROM t_tsh_assess WHERE id=#id#
+	</delete>
+	<!-- 删除t_tsh_assess_score -->
+	<delete id="del.assess.score" parameterClass="map">
+		DELETE FROM t_tsh_assess_score WHERE assessId=#assessId#
+	</delete>
+	<!-- 条件查询分数列表 -->
+	<select id="qry.score.list" parameterClass="map" resultClass="scoreDTO">
+		SELECT * FROM t_tsh_assess_score WHERE assessId=#id#
+	</select>
+	<!-- 更新自评表信息 -->
+	<update id="update.assess">
+		UPDATE t_tsh_assess SET
+			assCode=#assCode#,
+			title=#title#,
+			remark=#remark#,
+			type=#type#,
+			typeCode=#typeCode#,
+			flushDate=#flushDate#,
+			status=#status#,
+			updateDate=#updateDate#,
+			updateBy=#updateBy#
+		WHERE id=#id#	
+	</update>
+	<!-- 更新分数表信息 -->
+	<update id="update.score">
+		UPDATE t_tsh_assess_score SET
+			assessId=#assessId#,
+			`option`=#option#,
+			score=#score#,
+			updateDate=#updateDate#,
+			updateBy=#updateBy#
+		WHERE id=#id#
+	</update>
+</sqlMap>
+

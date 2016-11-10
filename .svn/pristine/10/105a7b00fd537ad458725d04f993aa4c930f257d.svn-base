@@ -1,0 +1,28 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<div id="topbar">
+		<div class="content">
+			<span class="fl">欢迎来到甲亢管理中心！</span> <span class="fr"><a
+				href="＃" class="toplink" target='_blank'>甲亢管理</a><a
+				href="＃">甲亢管理首页</a></span> <span class="cl"></span>
+		</div>
+	</div>
+	<div id="logo_area">
+		<a href="＃"><img
+			src="http://tiku.21cnjy.com/template/green/tiku/images/logo_tiku.png"
+			alt="21世纪教育网——题库" title="21世纪教育网——题库" /></a>
+	</div>
+	<div id="nav">
+		<div class="content">
+			<ul>
+				<li ><a href="/">首页</a></li>
+				<li class='current'><a href="${pageContext.request.contextPath }/ptsAssess/generateAssess">甲亢症状自评</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsAssess/generateAssess">评测结果分析</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsPatients/toMain">我的随访时间</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsBBS/toMain">医患交流</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsUsers/toModify">修改注册信息</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsUsers/toModifyPwd">修改密码</a></li>
+				<li><a href="${pageContext.request.contextPath }/ptsAssess/generateAssess">软件说明</a></li>
+			</ul>
+		</div>
+	</div>

@@ -1,0 +1,277 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/commons/head.jsp"%>
+<script type="text/javascript"
+	src="../CacheableResource/ckeditor/ckeditor.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		var STYLEID = '1', STATICURL = 'static/', IMGDIR = 'static/image/common', VERHASH = 'uW1', charset = 'utf-8', discuz_uid = '0', cookiepre = 'aaaaHqNL_ef65_', cookiedomain = '.21cnjy.com', cookiepath = '/', showusercard = '1', attackevasive = '0', disallowfloat = 'newthread', creditnotice = '1|威望|,2|金钱|,3|贡献|', defaultstyle = '', REPORTURL = 'aHR0cDovL3Rpa3UuMjFjbmp5LmNvbS8=', SITEURL = 'http://tiku.21cnjy.com/', JSPATH = 'static/js/';
+		window.onerror = function() {
+			return true;
+		}
+		//var jq = jQuery.noConflict();//解决冲突
+	</script>
+	<link rel="stylesheet" type="text/css"
+		href="${pageContext.request.contextPath}/styles/assessDetail/reset.css" />
+	<link rel="stylesheet" type="text/css"
+		href="${pageContext.request.contextPath}/styles/assessDetail/tiku.css" />
+	<link rel="stylesheet" type="text/css"
+		href="${pageContext.request.contextPath}/styles/assessDetail/treeview.css" " />
+</head>
+
+<body>
+	<div id="topbar">
+		<div class="content">
+			<span class="fl">欢迎来到21世纪教育网题库中心！</span> <span class="fr"><a
+				href="http://www.21cnjy.com" class="toplink" target='_blank'>21世纪教育</a><a
+				href="http://tiku.21cnjy.com">在线题库首页</a></span> <span class="cl"></span>
+		</div>
+	</div>
+	<div id="logo_area">
+		<a href="http://tiku.21cnjy.com"><img
+			src="http://tiku.21cnjy.com/template/green/tiku/images/logo_tiku.png"
+			alt="21世纪教育网——题库" title="21世纪教育网——题库" /></a>
+		<div class="search_box">
+			<div class="searchingbar_sub">
+				<h4>
+					试题<i></i>
+				</h4>
+				<ul class="slide_ul">
+					<li>试题</li>
+					<li>试卷</li>
+				</ul>
+			</div>
+			<form id="searchform" action="/tiku.php?mod=search" method="post">
+				<input type="text" class="search_text search_txt" name="search"
+					id="searchtxt"
+					onkeydown="javascript:if (event.keyCode==13) $('.search_btn').click();"
+					autocomplete='off' /> <input type="button" class="search_btn" />
+			</form>
+		</div>
+	</div>
+	<div id="nav">
+		<div class="content">
+			<ul>
+				<li ><a href="/">首页</a></li>
+				<li class='current'><a href="#">甲亢症状自评</a></li>
+				<li><a href="">评测结果分析</a></li>
+				<li><a >初中试卷</a></li>
+				<li><a >高中试卷</a></li>
+
+			</ul>
+			<p>
+				<a href="http://test.21cnjy.com/" target="_blank" class="tiku-btn">在线组卷</a>
+			</p>
+			<!--p>共有<i> </i>套试卷，<i> </i>道试题</p-->
+			<!--span style="">今日更新<i>  </i>套</span></p-->
+		</div>
+	</div>
+	<script>
+		$(document).ready(function() {
+			$('.search_txt').focus(function() {
+				if ($(this).val() == '请输入您的搜索内容...')
+					$(this).val('');
+			})
+			$('.search_txt').focusout(function() {
+				if ($(this).val() == '') {
+					$(this).val("请输入您的搜索内容...");
+				}
+			})
+
+			/*下拉搜索*/
+			$('.slide_ul li').click(function() {
+				var txt = $(this).text() + "<i></i>";
+				$(this).parent('ul').siblings('h4').html(txt);
+				$('.slide_ul').fadeOut("fast");
+			});
+			$('.searchingbar_sub').hover(function() {
+				$(this).find(".slide_ul").css("z-index", "999");
+				$(this).find(".slide_ul").fadeIn("fast");
+				$(this).find("i").css({
+					"border-color" : "#fff #fff #bc0011 #fff",
+					"top" : "7px"
+				});
+			}, function() {
+				$(this).find(".slide_ul").css("z-index", "999");
+				$(this).find(".slide_ul").fadeOut("fast");
+				$(this).find("i").css({
+					"border-color" : "#bc0011 #fff #fff #fff",
+					"top" : "13px"
+				});
+			})
+			$('.search_btn').click(function() {
+				var val = $('.searchingbar_sub h4').text();
+				if (val == "试题") {
+					checkform(1);
+				} else {
+					checkform(2);
+				}
+			})
+
+			var wid = $(document).width();
+			if (wid <= 1100) {
+				$('.junior_ul').css('margin-left', '100px');
+				$('.senior_ul').css('margin-left', '60px');
+			}
+			$('.papersname_list li:odd').css('background', '#e2edf5');
+
+		});
+
+		$('.select_ul li').click(function() {
+			$(this).addClass('current').siblings().removeClass('current');
+		});
+		function checkform(type) {
+			searchtxt = document.getElementById("searchtxt").value;
+			if (searchtxt == '' || searchtxt == undefined
+					|| searchtxt == '请输入您的搜索内容...') {
+				alert('请输入搜索的关键字');
+				document.getElementById("searchtxt").focus();
+				return false;
+			}
+			document.getElementById("searchform").action = "/tiku.php?mod=search"
+					+ "&value=" + searchtxt + "&type=" + type;
+			document.getElementById("searchform").submit();
+		}
+	</script>
+	<div class="content mb10">
+		<div class="pad10 boxb" id="all_980_90_a"></div>
+	</div>
+
+	<div class="content">
+		<div id="mainbar">
+			<div class="test">
+				<h1>
+					<b>甲亢自我测评</b>
+				</h1>
+				<div class="test_container">
+				<form id="assessForm" method="post">
+					<c:forEach items="${rows }" var="assess" varStatus="count">
+					<div class="assess_content">
+						<h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${count.count}、${assess.title }</h4>
+						<input type="hidden" value="${assess.id }" name="assessIds" />
+						<p>
+							<c:forEach items="${assess.scores }" var="score"
+								varStatus="scoreCount">
+								<label for="socre_${score.id }"> 
+									<input type="radio" value="${score.id }_${score.score}" name="score_${assess.id }" id="socre_${score.id }">
+									<a>${scoreCount.count }、${score.option }(${score.score }分)</a>
+								</label><br />
+							</c:forEach>
+						</p>
+					</div>
+					</c:forEach>
+					<input type="submit" value="提交"  id="submitAssess"/>
+				</form>
+				</div>
+			</div>
+
+
+		</div>
+		<script>
+			$(function() {
+				function qqcontact() {
+					var qqonOff = true;
+					$('#s-btn').click(function() {
+						if (qqonOff) {
+							$('#qq-contact').animate({
+								right : "-184px"
+							});
+							qqonOff = !qqonOff;
+						} else {
+							$('#qq-contact').animate({
+								right : 0
+							});
+							qqonOff = !qqonOff;
+						}
+					})
+					$('#s-btn').hover(function() {
+						if (qqonOff) {
+							$(this).attr('title', '点击收起')
+						} else {
+							$(this).attr('title', '点击展开')
+						}
+					})
+				}
+				qqcontact();
+			})
+		</script>
+		<div id="footer">
+			<div class="content">
+				<div class="shengming">
+					<p>
+						<a href="http://news.21cnjy.com/A/130/153/V49006.shtml"
+							target="_blank">免责声明</a> <a
+							href="http://www.21cnjy.com/about/about_contact-us.php"
+							target="_blank">联系我们</a>
+					</p>
+					<p>地址：深圳市龙岗区横岗街道深峰路3号启航商务大厦5楼 邮编：518000 © 2004-2016 21世纪教育网
+						粤ICP备09188801号 粤教信息(2013)2号</p>
+				</div>
+				<div class="information">
+					<p>工作时间: AM9:00-PM6:00</p>
+					<p>
+						服务电话: 0755-25526569(总机)
+						<script
+							src="http://s25.cnzz.com/stat.php?id=1840905&web_id=1840905&show=pic1"
+							type="text/javascript" language="JavaScript"></script>
+					</p>
+				</div>
+			</div>
+			<div class="cl"></div>
+			<div class="links">
+				<div class="content">
+					<p>
+						<b>友情链接：</b>
+					<div style="float: right; width: 935px;">
+						<a href="http://zhongkao.21cnjy.com/" target="_blank">21中考资源网</a>&nbsp;<a
+							href="http://www.kt5u.com/" target="_blank">课堂无忧</a>&nbsp;<a
+							href="http://gaokao.21cnjy.com/" target="_blank">21高考资源网</a>&nbsp;<a
+							href="http://d1kt.cn/" target="_blank">第一课堂</a>&nbsp;<a
+							href="http://www.xuexiaozhaopin.com/" target="_blank">学校招聘</a>&nbsp;<a
+							href="http://www.21cnjy.com" target="_blank">21世纪教育</a>&nbsp;
+					</div>
+					</p>
+				</div>
+			</div>
+
+			<br />
+		</div>
+	</div>
+
+	<script src="http://cbjs.baidu.com/js/m.js" type="text/javascript"
+		type="text/javascript" type="text/javascript"></script>
+	<script type="text/javascript">
+		BAIDU_CLB_fillSlotAsync('954654', 'all_980_90_a');
+	</script>
+
+	<!--底部加载内容-->
+	<script>
+		$("#assessForm").submit(function(){
+			alert("dockj");
+			$.ajax({
+	    		url:"${pageContext.request.contextPath}/assess/submitAssess",
+	    		type:"POST", 
+	    		data:$("#assessForm").serialize(),
+	    		dataType:"json",
+	    		success:function(data){ 
+		    		if(data.resultCode=="0"){
+		    			main.query(false);
+		    	    	$('#win').window('close');
+		    		}else{ 
+		        		$.messager.alert('提示',data.note,'error');
+		    		}
+	    		}
+	    	});
+			return false;
+		});
+		$(function(){
+			$(".assess_content:even").css("background-color","#fbfbfb");
+			$(".assess_content:odd").css("background-color","#fbfaee");
+		});
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap>
+
+    <typeAlias alias="dictDTO" type="com.tsh.dictionary.entity.DictDTO" />
+    
+    <!-- 查询字典列表 -->
+    <select id="dictList.query" parameterClass="dictDTO" resultClass="dictDTO">
+    	<![CDATA[
+	        SELECT * FROM t_dictionary td
+	    ]]>
+        <dynamic prepend="WHERE">
+     		<isNotEmpty property="dataType">
+				td.dataType= #dataType#
+			</isNotEmpty>
+		</dynamic>
+    </select>
+   
+   <!-- 保存数据字典  -->
+   <insert id="dict.save" parameterClass="dictDTO" >
+     	 <![CDATA[
+	        INSERT INTO t_dictionary (
+	        	dataKey ,
+	        	dataValue ,
+	        	dataType
+	        ) VALUES (
+	        	#dataKey# ,
+	        	#dataValue# ,
+	        	#dataType#
+	        )
+	    ]]>
+   </insert>
+    
+   <!-- 更新数据字典  -->
+   <update id="dict.update"  parameterClass="dictDTO">
+         <![CDATA[
+	        UPDATE t_dictionary SET
+		        dataKey = #dataKey# ,
+		        dataValue = #dataValue#
+	        WHERE 
+		        id = #id# 
+    	  ]]>
+    </update>
+
+</sqlMap>
+

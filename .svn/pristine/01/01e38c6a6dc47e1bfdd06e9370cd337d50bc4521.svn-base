@@ -1,0 +1,77 @@
+<%@ page language="java" contentType="text/html;charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/commons/head.jsp"%>
+<%@ include file="/WEB-INF/views/commons/pts/ptsHead.jsp"%>
+</head>
+<body>
+	<%@ include file="/WEB-INF/views/commons/pts/toorbar.jsp"%>
+	<div class="content mb10">
+		<div class="pad10 boxb" id="all_980_90_a"></div>
+	</div>
+	<div class="content">
+		<div id="mainbar">
+		
+			<div class="test">
+				<h1>
+					<b>未随访记录</b>
+				</h1>
+				<div class="test_container">
+					<c:forEach items="${follows }" var="follow" varStatus="count">
+					<div class="assess_content">
+						<h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${count.count}、<span style="margin-left:20px;">随访时间：${follow.followDate }</span></h4>
+					</div>
+					</c:forEach>
+				</div>
+			</div>
+		
+			<div class="test">
+				<h1>
+					<b>已随访记录</b>
+				</h1>
+				<div class="test_container">
+					<c:forEach items="${followeds }" var="followed" varStatus="count">
+					<div class="assess_content">
+						<h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${count.count}、<span style="margin-left:20px;">随访时间：${followed.followDate }</span><span style="margin-left:20px">已随访时间：${followed.followedDate }</span></h4>
+						<p>
+							<span style="color: #0a8cd2;" >随访结果：</span><span style="margin-left:10px;color: coral;">${followed.result }</span>
+						</p>
+					</div>
+					</c:forEach>
+				</div>
+			</div>
+		</div>
+
+	<script src="http://cbjs.baidu.com/js/m.js" type="text/javascript"
+		type="text/javascript" type="text/javascript"></script>
+	<script type="text/javascript">
+		BAIDU_CLB_fillSlotAsync('954654', 'all_980_90_a');
+	</script>
+
+	<!--底部加载内容-->
+	<script>
+		$("#assessForm").submit(function(){
+			$.ajax({
+	    		url:"${pageContext.request.contextPath}/assess/submitAssess",
+	    		type:"POST", 
+	    		data:$("#assessForm").serialize(),
+	    		dataType:"json",
+	    		success:function(data){ 
+		    		if(data.resultCode=="0"){
+		    	    	$('#win').window('close');
+		    		}else{ 
+		        		$.messager.alert('提示',data.note,'error');
+		    		}
+	    		}
+	    	});
+			return false;
+		});
+		$(function(){
+			$(".assess_content:even").css("background-color","#fbfbfb");
+			$(".assess_content:odd").css("background-color","#fbfaee");
+		});
+	</script>
+
+</body>
+</html>

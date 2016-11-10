@@ -1,0 +1,8 @@
+use dev_tsh;
+#初始化角色数据
+insert into t_sys_role(name,description,roleNo,status,createBy,createDate,updateBy,updateDate) values('医生','医生','1','0','0',now(),'0',now());
+insert into t_sys_role(name,description,roleNo,status,createBy,createDate,updateBy,updateDate) values('患者','病人','2','1','0',now(),'0',now());
+#插入字典表甲亢类型信息
+insert into t_dictionary(dataKey,dataType,dataValue) values ('10001','assType','阳性症状');
+insert into t_dictionary(dataKey,dataType,dataValue) values ('10002','assType','阴性症状');
+commit;

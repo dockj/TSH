@@ -1,0 +1,98 @@
+package com.tsh.assess.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tsh.assess.entity.AssessDTO;
+import com.tsh.assess.service.AssessService;
+import com.tsh.common.BaseController;
+
+import net.sf.json.JSONObject;
+
+@Controller
+@RequestMapping("/ptsAssess")
+public class PtsAssessController extends BaseController
+{
+	@Autowired
+	private AssessService assessService;
+	
+	/**
+	 * 生产自评表
+	 */
+	@RequestMapping("generateAssess")
+	public String generateAssess(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+
+		List<AssessDTO> assessDTOs = assessService.generateAssess();
+		model.addAttribute("rows", assessDTOs);
+		return "assess/pts/self_assess";
+	}
+
+
+
+	/**
+	 * 提交自评信息
+	 */
+	@RequestMapping("submitAssess")
+	public void submit(HttpServletRequest request, HttpServletResponse response)
+	{
+		JSONObject result = new JSONObject();
+		try
+		{
+			// 1、获取题目
+			String[] assessIds = request.getParameterValues("assessIds");
+			if (assessIds == null)
+			{
+				result.put("resultCode", "-1");
+				result.put("note", "系统异常！");
+				this.printJSON(response, result);
+				return;
+			}
+			// 获取每个题目的每个答案
+			List<String> scoreIds = new ArrayList<String>();
+			// 计算总分
+			double count = 0;
+			for (int i = 0; i < assessIds.length; i++)
+			{
+				String scoreId = request.getParameter("score_" + assessIds[i]);
+				if (scoreId == null)
+				{
+					result.put("resultCode", "-2");
+					result.put("note", "第" + (i + 1) + "题，无结果！");
+					this.printJSON(response, result);
+					return;
+				}
+				String[] scoreIdAndScore = scoreId.split("_");
+				count += Double.valueOf(scoreIdAndScore[1]);
+				scoreIds.add(scoreIdAndScore[0]);
+			}
+
+			// 获取用户信息
+			JSONObject user = (JSONObject) request.getSession().getAttribute("user");
+			assessService.insertAssessResult(assessIds, scoreIds, count, user);
+			result.put("resultCode", "0");
+			result.put("note", "提交成功");
+		}
+		catch (Exception e)
+		{
+			result.put("resultCode", "-200");
+			result.put("note", "系统异常！");
+		}
+		this.printJSON(response, result);
+		return;
+
+	}
+	
+	/**
+	 * 查询自评结果
+	 */
+	
+}

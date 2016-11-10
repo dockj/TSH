@@ -1,0 +1,110 @@
+package com.tsh.assess.service.impl;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.tsh.assess.dao.AssessDao;
+import com.tsh.assess.entity.AssessDTO;
+import com.tsh.assess.entity.ScoreDTO;
+import com.tsh.assess.service.AssessService;
+import com.tsh.common.DateUtils;
+import com.tsh.common.pagination.PaginatedDTO;
+
+import net.sf.json.JSONObject;
+
+@Service
+public class AssessServiceImpl implements AssessService
+{
+	@Autowired
+	private AssessDao assessDao;
+
+	@Override
+	public List<AssessDTO> qryAssessByMap(Map<String, Object> param)
+	{
+		List<AssessDTO> dtos = assessDao.qryAssessByMap(param);
+		if (dtos == null || dtos.size() < 1)
+		{
+			return null;
+		}
+		return dtos;
+	}
+
+	@Transactional
+	@Override
+	public void insertAssess(AssessDTO dto, String[] scores, String[] options, JSONObject user) throws Exception
+	{
+		Date now = new Date();
+		Long userId = Long.valueOf(user.optString("userId"));
+		// 1、插入数据至t_tsh_assess表中
+		dto.setFlushDate(DateUtils.formate(now));
+		dto.setCreateBy(userId);
+		dto.setUpdateBy(userId);
+		dto.setCreateDate(now);
+		dto.setUpdateDate(now);
+		Long assessId = assessDao.insertAssess(dto);
+		// 2、插入数据至t_tsh_assess_score
+		ScoreDTO scoreDTO = null;
+		for (int i = 0; i < scores.length; i++)
+		{
+			scoreDTO = new ScoreDTO();
+			scoreDTO.setAssessId(assessId);
+			scoreDTO.setCreateBy(userId);
+			scoreDTO.setUpdateBy(userId);
+			scoreDTO.setCreateDate(now);
+			scoreDTO.setUpdateDate(now);
+			scoreDTO.setOption(options[i]);
+			scoreDTO.setScore(Integer.valueOf(scores[i]));
+			assessDao.insertAssessScore(scoreDTO);
+		}
+	}
+
+	@Override
+	public PaginatedDTO<AssessDTO> qryPageAssess(AssessDTO dto)
+	{
+		return assessDao.qryPageAssess(dto);
+	}
+
+	@Transactional
+	@Override
+	public void delAssessById(String id)
+	{
+		assessDao.delAssessById(id);
+		assessDao.delAssessScore(id);
+	}
+
+	@Override
+	public List<ScoreDTO> qryScoreByMap(Map<String, Object> param)
+	{
+		return assessDao.qryScoreByMap(param);
+	}
+
+	@Transactional
+	@Override
+	public void updateAssess(AssessDTO dto, String[] scores, String[] options, JSONObject user, String[] ids)
+	{
+		Date now=new Date();
+		Long userId = Long.valueOf(user.optString("userId"));
+		dto.setUpdateBy(userId);
+		dto.setUpdateDate(now);
+		dto.setFlushDate(DateUtils.formate(now));
+		assessDao.updateAssess(dto);
+		
+		ScoreDTO score=new ScoreDTO();
+		for(int i=0;i<scores.length;i++)
+		{
+			score.setId(Long.valueOf(ids[i]));
+			score.setAssessId(dto.getId());
+			score.setOption(options[i]);
+			score.setScore(Integer.valueOf(scores[i]));
+			score.setUpdateBy(userId);
+			score.setUpdateDate(now);
+			assessDao.updateScore(score);
+		}
+	}
+
+}

@@ -1,0 +1,63 @@
+body{font:12px/1.5 "Microsoft Yahei","微软雅黑",simsun,sans-serif; color:#333; background:#ededed;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}
+
+.urbangreymenu {
+	width: 190px; /*width of menu*/
+}
+
+.urbangreymenu .headerbar {
+	padding:5px 10px;
+	line-height:20px;
+	color:#15428b;
+	font-weight:bold;
+	font-size:14px;
+	background:#AFC2FF;
+	position:relative;
+	border:1px solid #99BBE8;
+	cursor:pointer;
+	margin:1px 0;
+}
+
+.urbangreymenu ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	margin-bottom: 0;
+	overflow:auto;
+	/*bottom spacing between each UL and rest of content*/
+}
+
+.urbangreymenu ul li {
+	padding-bottom: 1px; /*bottom spacing between menu items*/
+}
+
+.urbangreymenu ul li a {
+	/* background: #E9E9E9; */
+	display: block;
+	padding: 5px 0;
+	line-height: 20px;
+	padding-left: 8px; /*link text is indented 8px*/
+	text-decoration: none;
+	color: #000;
+	border-bottom:1px solid #ddd;
+}
+
+.urbangreymenu ul li a:visited {
+	color: #000;
+}
+
+.urbangreymenu ul li a:hover { /*hover state CSS*/
+	color: #fff;
+	background: #C5BCBC;
+}
+
+.urbangreymenu .currentClickMenu {
+	/* color: #fff !important; */
+	background: #fff;
+	font-weight:bold;
+}
+
+.arowd{background:url(../images/arrow.png) right center no-repeat;}
+.ulopen .arowd{background:url(../images/arrowa.png) right center no-repeat;}
+.menuul{display:none;}
+.ulopen .menuul{display:block;}
